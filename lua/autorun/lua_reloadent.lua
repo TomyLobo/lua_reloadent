@@ -1,53 +1,53 @@
---------------------------------------------------------------
--- Usage:                                                   --
---   lua_reloadent{,_sv,_cl} <sent_class>                   --
---   lua_reloadent{,_sv,_cl} <swep_class>                   --
---   lua_reloadent{,_sv,_cl} <toolmode>                     --
---   lua_loadent <sent_class>                               --
---   lua_loadent <swep_class>                               --
---                                                          --
--- lua_reloadent_sv reloads on the client.                  --
--- lua_reloadent_cl reloads on the server.                  --
--- lua_reloadent    reloads on the server and all clients.  --
--- lua_loadent      registers a new entity class            --
---                                                          --
---------------------------------------------------------------
--- Examples:                                                --
---   lua_reloadent lol_bomb                                 --
---   lua_reloadent baby_gun                                 --
---   lua_reloadent explode_tool                             --
---                                                          --
---------------------------------------------------------------
--- Pitfalls:                                                --
---   Make sure your code replaces all hooks it may have     --
---   placed, or the previous code might handle those hooks  --
---   instead. Same goes for timers.                         --
---                                                          --
---   Special care should be taken for timer.Simple:         --
---   Make sure there is no timer.Simple still running from  --
---   your code while using lua_reloadent.                   --
---                                                          --
---   The client-side portion of this doesn't work well,     --
---   since gmod doesn't reload the the files from disk when --
---   doing "include" on the client.                         --
---   An exception to this is single-player mode, so you     --
---   should use that to develop client-side code.           --
---                                                          --
---   The InitPostEntity event will not be called by         --
---   lua_reloadent. This means you cannot use it to fill    --
---   locals with globals from other components.             --
---                                                          --
---------------------------------------------------------------
--- Version history:                                         --
---   1.41 - Auto-complete is now case-insensitive.          --
---        - Fixed a Lua error in lua_loadent.               --
---   1.4  - Added autocomplete for lua_reloadent* commands  --
---   1.3  - lua_(re)loadent now looks into the gamemode too --
---   1.21 - lua_loadent now fills all ENT/SWEP fields       --
---   1.2  - Made lua_loadent work with SWEPs as well        --
---   1.1  - Added lua_loadent                               --
---   1.0  - First public release                            --
---------------------------------------------------------------
+---------------------------------------------------------------
+-- Usage:                                                    --
+--   lua_reloadent{,_sv,_cl} <sent_class>                    --
+--   lua_reloadent{,_sv,_cl} <swep_class>                    --
+--   lua_reloadent{,_sv,_cl} <toolmode>                      --
+--   lua_loadent <sent_class>                                --
+--   lua_loadent <swep_class>                                --
+--                                                           --
+-- lua_reloadent_sv reloads on the client.                   --
+-- lua_reloadent_cl reloads on the server.                   --
+-- lua_reloadent    reloads on the server and all clients.   --
+-- lua_loadent      registers a new entity class             --
+--                                                           --
+---------------------------------------------------------------
+-- Examples:                                                 --
+--   lua_reloadent lol_bomb                                  --
+--   lua_reloadent baby_gun                                  --
+--   lua_reloadent explode_tool                              --
+--                                                           --
+---------------------------------------------------------------
+-- Pitfalls:                                                 --
+--   Make sure your code replaces all hooks it may have      --
+--   placed, or the previous code might handle those hooks   --
+--   instead. Same goes for timers.                          --
+--                                                           --
+--   Special care should be taken for timer.Simple:          --
+--   Make sure there is no timer.Simple still running from   --
+--   your code while using lua_reloadent.                    --
+--                                                           --
+--   The client-side portion of this doesn't work well,      --
+--   since gmod doesn't reload the the files from disk when  --
+--   doing "include" on the client.                          --
+--   An exception to this is single-player mode, so you      --
+--   should use that to develop client-side code.            --
+--                                                           --
+--   The InitPostEntity event will not be called by          --
+--   lua_reloadent. This means you cannot use it to fill     --
+--   locals with globals from other components.              --
+--                                                           --
+---------------------------------------------------------------
+-- Version history:                                          --
+--   1.4.1 - Auto-complete is now case-insensitive.          --
+--         - Fixed a Lua error in lua_loadent.               --
+--   1.4   - Added autocomplete for lua_reloadent* commands  --
+--   1.3   - lua_(re)loadent now looks into the gamemode too --
+--   1.2.1 - lua_loadent now fills all ENT/SWEP fields       --
+--   1.2   - Made lua_loadent work with SWEPs as well        --
+--   1.1   - Added lua_loadent                               --
+--   1.0   - First public release                            --
+---------------------------------------------------------------
 
 AddCSLuaFile("lua_reloadent.lua")
 
