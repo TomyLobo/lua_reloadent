@@ -24,8 +24,8 @@
 --   instead. Same goes for timers.                         --
 --                                                          --
 --   Special care should be taken for timer.Simple:         --
---   Make sure there is no timer.Simple still running from  --
---   your code while using lua_reloadent.                   --
+--   Make sure there is no timer.Simple running from your   --
+--   code when you use lua_reloadent.                       --
 --                                                          --
 --   The client-side portion of this doesn't work well,     --
 --   since gmod doesn't reload the the files from disk when --
@@ -33,13 +33,8 @@
 --   An exception to this is single-player mode, so you     --
 --   should use that to develop client-side code.           --
 --                                                          --
---   The InitPostEntity event will not be called by         --
---   lua_reloadent. This means you cannot use it to fill    --
---   locals with globals from other components.             --
---                                                          --
 --------------------------------------------------------------
 -- Version history:                                         --
---   1.41 - Autocomplete is now case-insensitive            --
 --   1.4  - Added autocomplete for lua_reloadent* commands  --
 --   1.3  - lua_(re)loadent now looks into the gamemode too --
 --   1.21 - lua_loadent now fills all ENT/SWEP fields       --
@@ -167,7 +162,7 @@ end
 if SERVER then
 	
 	---------------------- Register server-side lua_reloadent ----------------------
-	-- The client is supposed to register less ugly proxy commands for these, which support auto-completition
+	-- The client is supposed to register less ugly proxy commands for this, supporting auto-completition
 	concommand.Add("_lua_reloadentity_sv", function(ply,command,args)
 		if not ply:IsSuperAdmin() then return end
 		
@@ -246,7 +241,7 @@ elseif CLIENT then
 	-- Adds all trie nodes starting with "startswith from the trie "ent_index" to the list "ret" and prefixes them with "prefix"
 	local function add_ents(ret, startswith, prefix, ent_index)
 		for k,v in pairs(ent_index) do
-			if k:sub(1,#startswith):lower() == startswith:sub(1,#k):lower() then
+			if k:sub(1,#startswith) == startswith:sub(1,#k) then
 				if v and #startswith >= #k then
 					add_ents(ret,startswith:sub(#k+1), prefix..k, v)
 				elseif #startswith <= #k then
@@ -313,7 +308,7 @@ local function lua_loadwep(entname, filename)
 	
 	SWEP = nil
 	
-	if CLIENT then build_ent_index() end
+	build_ent_index()
 end
 
 local function lua_loadent(entname, filename)
@@ -340,7 +335,7 @@ local function lua_loadent(entname, filename)
 	
 	ENT = nil
 	
-	if CLIENT then build_ent_index() end
+	build_ent_index()
 end
 
 if SERVER then
