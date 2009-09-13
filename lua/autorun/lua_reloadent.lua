@@ -165,6 +165,7 @@ local function lua_reloadent(entname, filename)
 	end
 end
 
+local build_ent_index
 if SERVER then
 	
 	---------------------- Register server-side lua_reloadent ----------------------
@@ -223,7 +224,7 @@ elseif CLIENT then
 	end
 	
 	-- builds a new trie for lookup by autocomplete functions
-	local function build_ent_index()
+	function build_ent_index()
 		ent_index = {}
 		for class,_ in pairs(scripted_ents.GetList()) do
 			assign_index(class,ent_index)
