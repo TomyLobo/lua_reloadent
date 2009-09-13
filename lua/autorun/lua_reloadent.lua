@@ -159,8 +159,10 @@ local function lua_reloadent(entname, filename)
 	
 	for _,ent in ipairs(ents.FindByClass(entname)) do
 		local table = ent:GetTable()
-		for k,v in pairs(metatable) do
-			table[k] = v
+		if table then
+			for k,v in pairs(metatable) do
+				table[k] = v
+			end
 		end
 	end
 end
