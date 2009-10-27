@@ -37,6 +37,11 @@
 --   lua_reloadent. This means you cannot use it to fill     --
 --   locals with globals from other components.              --
 --                                                           --
+--   lua_reloadent does not call ENT:Initialize() or any     --
+--   function you might have called from tool code, like     --
+--   ENT:Setup. It relies on the existing entity state and   --
+--   merely replaces the functions.                          --
+--                                                           --
 ---------------------------------------------------------------
 -- Version history:                                          --
 --   1.4.1 - Auto-complete is now case-insensitive.          --
@@ -54,6 +59,24 @@ AddCSLuaFile("lua_reloadent.lua")
 -- helper functions
 local function luaExists(luaname)
 	return #file.FindInLua(luaname) ~= 0
+end
+
+local include2 = include
+
+if CLIENT and not SinglePlayer() then
+	local files = {}
+	
+	function include2(filename)
+		local contents = files[filename]
+		if contents then
+			return RunString(contents)
+		else
+			return include(filename)
+		end
+	end
+	function lua_reloadent_addfile(filename, contents)
+		files[filename] = contents
+	end
 end
 
 local function getent(entname)
@@ -88,10 +111,10 @@ local function lua_reloadtool(toolmode)
 	--TOOL = ToolObj:Create()
 	TOOL.Mode = toolmode
 	if metatable.SourceFile then 
-		include(metatable.SourceFile)
+		include2(metatable.SourceFile)
 		--TODO: maybe include sv_ variant as well?
 	elseif luaExists("weapons/gmod_tool/stools/"..toolmode..".lua") then
-		include("weapons/gmod_tool/stools/"..toolmode..".lua")
+		include2("weapons/gmod_tool/stools/"..toolmode..".lua")
 	else
 		error("No source file for tool '"..toolmode.."' found.",0)
 	end
@@ -121,9 +144,9 @@ local function lua_reloadwep(entname, filename)
 	
 	SWEP = metatable
 	if entname == "gmod_tool" or luaExists(metatable.Folder..filename) then
-		include(metatable.Folder..filename)
+		include2(metatable.Folder..filename)
 	elseif luaExists(metatable.Folder.."/shared.lua") then
-		include(metatable.Folder.."/shared.lua")
+		include2(metatable.Folder.."/shared.lua")
 	else
 		error("No source file for weapon '"..entname.."' found.",0)
 	end
@@ -149,9 +172,9 @@ local function lua_reloadent(entname, filename)
 	
 	ENT = metatable
 	if luaExists(metatable.Folder..filename) then
-		include(metatable.Folder..filename)
+		include2(metatable.Folder..filename)
 	elseif luaExists(metatable.Folder.."/shared.lua") then
-		include(metatable.Folder.."/shared.lua")
+		include2(metatable.Folder.."/shared.lua")
 	else
 		error("No source file for entity '"..entname.."' found.",0)
 	end
@@ -306,9 +329,9 @@ local function lua_loadwep(entname, filename)
 		Secondary = {},
 	}
 	if luaExists(folder..filename) then
-		include(folder..filename)
+		include2(folder..filename)
 	elseif luaExists(folder.."/shared.lua") then
-		include(folder.."/shared.lua")
+		include2(folder.."/shared.lua")
 	else
 		error("No source file for entity/weapon '"..entname.."' found.",0)
 	end
@@ -330,10 +353,10 @@ local function lua_loadent(entname, filename)
 	ENT = { Folder = folder }
 	if luaExists(folder..filename) then
 		Msg("Loading entity '"..entname.."'...\n")
-		include(folder..filename)
+		include2(folder..filename)
 	elseif luaExists(folder.."/shared.lua") then
 		Msg("Loading entity '"..entname.."'...\n")
-		include(folder.."/shared.lua")
+		include2(folder.."/shared.lua")
 	else
 		ENT = nil
 		return lua_loadwep(entname, filename)
