@@ -208,10 +208,7 @@ if SERVER then
 		lua_reloadent(args[1], "/init.lua")
 		
 		-- reload on the clients
-		local rp = RecipientFilter()
-		rp:AddAllPlayers()
-		
-		umsg.Start("lua_reloadent", rp)
+		umsg.Start("lua_reloadent")
 			umsg.String(args[1])
 		umsg.End()
 	end)
