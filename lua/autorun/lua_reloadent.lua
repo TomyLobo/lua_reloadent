@@ -90,7 +90,8 @@ end
 
 local function getwep(entname)
 	for _,v in pairs(weapons.GetList()) do
-		if v.Classname == entname then return v end
+		local className = v.Classname or v.ClassName
+		if className == entname then return v end
 	end
 end
 
@@ -252,12 +253,12 @@ elseif CLIENT then
 	-- builds a new trie for lookup by autocomplete functions
 	function build_ent_index()
 		ent_index = {}
-		for class,_ in pairs(scripted_ents.GetList()) do
-			assign_index(class,ent_index)
+		for className,_ in pairs(scripted_ents.GetList()) do
+			assign_index(className,ent_index)
 		end
 		for _,v in pairs(weapons.GetList()) do
-			local class = v.Classname or v.ClassName
-			if class == "gmod_tool" then gmod_tool = v end
+			local className = v.Classname or v.ClassName
+			if className == "gmod_tool" then gmod_tool = v end
 			assign_index(v.ClassName,ent_index)
 		end
 		if gmod_tool then
