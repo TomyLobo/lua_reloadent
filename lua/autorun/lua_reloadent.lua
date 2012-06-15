@@ -55,10 +55,13 @@
 ---------------------------------------------------------------
 
 AddCSLuaFile("lua_reloadent.lua")
+local FindInLua = file.FindInLua or function(path)
+	return file.Find(path, LUA_PATH)
+end
 
 -- helper functions
 local function luaExists(luaname)
-	return #file.FindInLua(luaname) ~= 0
+	return #FindInLua(luaname) ~= 0
 end
 
 local include2 = include
@@ -252,8 +255,9 @@ elseif CLIENT then
 			assign_index(class,ent_index)
 		end
 		for _,v in pairs(weapons.GetList()) do
-			if v.Classname == "gmod_tool" then gmod_tool = v end
-			assign_index(v.Classname,ent_index)
+			local class = v.Classname or v.ClassName
+			if class == "gmod_tool" then gmod_tool = v end
+			assign_index(v.ClassName,ent_index)
 		end
 		if gmod_tool then
 			for toolmode,_ in pairs(gmod_tool.Tool) do
