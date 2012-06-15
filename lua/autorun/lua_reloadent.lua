@@ -65,7 +65,7 @@ local include2 = include
 
 if CLIENT and not SinglePlayer() then
 	local files = {}
-	
+
 	function include2(filename)
 		local contents = files[filename]
 		if contents then
@@ -106,11 +106,11 @@ local function lua_reloadtool(toolmode)
 	else
 		error("Entity/weapon/tool '"..toolmode.."' not found.",0)
 	end
-	
+
 	SWEP = gmod_tool TOOL = metatable ToolObj = getmetatable(metatable)
 	--TOOL = ToolObj:Create()
 	TOOL.Mode = toolmode
-	if metatable.SourceFile then 
+	if metatable.SourceFile then
 		include2(metatable.SourceFile)
 		--TODO: maybe include sv_ variant as well?
 	elseif luaExists("weapons/gmod_tool/stools/"..toolmode..".lua") then
@@ -118,12 +118,12 @@ local function lua_reloadtool(toolmode)
 	else
 		error("No source file for tool '"..toolmode.."' found.",0)
 	end
-	
+
 	--TOOL:CreateConVars()
 	--gmod_tool.Tool[ toolmode ] = TOOL
 	metatable = gettool(toolmode, gmod_tool)
 	TOOL = nil SWEP = nil ToolObj = nil
-	
+
 	for _,ent in ipairs(ents.FindByClass("gmod_tool")) do
 		local table = gettool(toolmode, ent)
 		for k,v in pairs(metatable) do
@@ -141,7 +141,7 @@ local function lua_reloadwep(entname, filename)
 		return lua_reloadtool(entname)
 		--error("Weapon '"..entname.."' not found.",0)
 	end
-	
+
 	SWEP = metatable
 	if entname == "gmod_tool" or luaExists(metatable.Folder..filename) then
 		include2(metatable.Folder..filename)
@@ -151,7 +151,7 @@ local function lua_reloadwep(entname, filename)
 		error("No source file for weapon '"..entname.."' found.",0)
 	end
 	SWEP = nil
-	
+
 	for _,ent in ipairs(ents.FindByClass(entname)) do
 		local table = ent:GetTable()
 		for k,v in pairs(metatable) do
@@ -169,7 +169,7 @@ local function lua_reloadent(entname, filename)
 		return lua_reloadwep(entname, filename)
 		--error("Entity "..entname.." not found.",0)
 	end
-	
+
 	ENT = metatable
 	if luaExists(metatable.Folder..filename) then
 		include2(metatable.Folder..filename)
@@ -179,7 +179,7 @@ local function lua_reloadent(entname, filename)
 		error("No source file for entity '"..entname.."' found.",0)
 	end
 	ENT = nil
-	
+
 	for _,ent in ipairs(ents.FindByClass(entname)) do
 		local table = ent:GetTable()
 		if table then
@@ -192,32 +192,32 @@ end
 
 local build_ent_index
 if SERVER then
-	
+
 	---------------------- Register server-side lua_reloadent ----------------------
 	-- The client is supposed to register less ugly proxy commands for these, which support auto-completition
 	concommand.Add("_lua_reloadentity_sv", function(ply,command,args)
 		if not ply:IsSuperAdmin() then return end
-		
+
 		lua_reloadent(args[1], "/init.lua")
 	end)
-	
+
 	concommand.Add("_lua_reloadent", function(ply,command,args)
 		if not ply:IsSuperAdmin() then return end
-		
+
 		-- reload on the server
 		lua_reloadent(args[1], "/init.lua")
-		
+
 		-- reload on the clients
 		umsg.Start("lua_reloadent")
 			umsg.String(args[1])
 		umsg.End()
 	end)
-	
+
 elseif CLIENT then
-	
+
 	------------------------------ Auto-completition -------------------------------
 	local ent_index
-	
+
 	-- inserts "index" into the trie
 	local function assign_index(index, ent_index)
 		local prefix, newindex = string.match(index, "^(.-_)(.*)$")
@@ -228,7 +228,7 @@ elseif CLIENT then
 		end
 		ent_index[index] = false
 	end
-	
+
 	-- condenses degenerate parts of the trie
 	local function condense_table(ent_index)
 		local to_insert = {}
@@ -244,7 +244,7 @@ elseif CLIENT then
 		end
 		if table.Count(ent_index) < 2 then return true end
 	end
-	
+
 	-- builds a new trie for lookup by autocomplete functions
 	function build_ent_index()
 		ent_index = {}
@@ -260,13 +260,13 @@ elseif CLIENT then
 				assign_index(toolmode,ent_index)
 			end
 		end
-		
+
 		condense_table(ent_index)
 	end
-	
+
 	build_ent_index() -- only needed if this script is ever reload.
 	hook.Add("InitPostEntity", "lua_reloadent_build_ent_index", build_ent_index)
-	
+
 	-- Adds all trie nodes starting with "startswith from the trie "ent_index" to the list "ret" and prefixes them with "prefix"
 	local function add_ents(ret, startswith, prefix, ent_index)
 		for k,v in pairs(ent_index) do
@@ -279,7 +279,7 @@ elseif CLIENT then
 			end
 		end
 	end
-	
+
 	local function autocomplete(commandName,args)
 		args = string.match(args,"^%s*(.-)%s*$")
 		local ret = {}
@@ -287,25 +287,25 @@ elseif CLIENT then
 		table.sort(ret)
 		return ret
 	end
-	
+
 	------ Register proxy commands for the server-side lua_reloadent commands ------
 	local function proxy(ply,command,args)
 		RunConsoleCommand("_"..string.gsub(command,"ent_","entity_"), unpack(args))
 	end
-	
+
 	concommand.Add("lua_reloadent", proxy, autocomplete)
 	concommand.Add("lua_reloadent_sv", proxy, autocomplete)
-	
+
 	---------------------- Register client-side lua_reloadent ----------------------
-	
+
 	concommand.Add("lua_reloadent_cl", function(ply,command,args)
 		lua_reloadent(args[1], "/cl_init.lua")
 	end, autocomplete)
-	
+
 	usermessage.Hook("lua_reloadent", function(message)
 		lua_reloadent(message:ReadString(), "/cl_init.lua")
 	end)
-	
+
 end -- if CLIENT
 
 --------------------------------- lua_loadent ----------------------------------
@@ -314,11 +314,11 @@ local function lua_loadwep(entname, filename)
 	if weapons.Get(entname) then
 		error("Weapon '"..entname.."' already registered. Use 'lua_reloadent "..entname.."' to reload it.",0)
 	end
-	
+
 	local folder = "weapons/"..entname
-	
+
 	Msg("Loading weapon '"..entname.."'...\n")
-	
+
 	SWEP = {
 		Folder = folder,
 		Base = "weapon_base",
@@ -332,11 +332,11 @@ local function lua_loadwep(entname, filename)
 	else
 		error("No source file for entity/weapon '"..entname.."' found.",0)
 	end
-	
+
 	weapons.Register(SWEP, entname, false)
-	
+
 	SWEP = nil
-	
+
 	if CLIENT then build_ent_index() end
 end
 
@@ -344,9 +344,9 @@ local function lua_loadent(entname, filename)
 	if scripted_ents.Get(entname) then
 		error("Entity '"..entname.."' already registered. Use 'lua_reloadent "..entname.."' to reload it.",0)
 	end
-	
+
 	local folder = "entities/"..entname
-	
+
 	ENT = { Folder = folder }
 	if luaExists(folder..filename) then
 		Msg("Loading entity '"..entname.."'...\n")
@@ -359,25 +359,25 @@ local function lua_loadent(entname, filename)
 		return lua_loadwep(entname, filename)
 		--error("No source file for entity '"..entname.."' found.",0)
 	end
-	
+
 	scripted_ents.Register(ENT, entname, false)
-	
+
 	ENT = nil
-	
+
 	if CLIENT then build_ent_index() end
 end
 
 if SERVER then
 	concommand.Add("lua_loadent", function(ply,command,args)
 		if not ply:IsSuperAdmin() then return end
-		
+
 		-- load on the server
 		lua_loadent(args[1], "/init.lua")
-		
+
 		-- load on the clients
 		local rp = RecipientFilter()
 		rp:AddAllPlayers()
-		
+
 		umsg.Start("lua_loadent", rp)
 			umsg.String(args[1])
 		umsg.End()
