@@ -44,6 +44,7 @@
 --                                                           --
 ---------------------------------------------------------------
 -- Version history:                                          --
+--   1.5.0 - Added support for current GMod 12/13 versions.  --
 --   1.4.1 - Auto-complete is now case-insensitive.          --
 --         - Fixed a Lua error in lua_loadent.               --
 --   1.4   - Added autocomplete for lua_reloadent* commands  --
