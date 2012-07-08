@@ -28,7 +28,7 @@
 --   your code while using lua_reloadent.                    --
 --                                                           --
 --   The client-side portion of this doesn't work well,      --
---   since gmod doesn't reload the the files from disk when  --
+--   since gmod doesn't reload the files from the disk when  --
 --   doing "include" on the client.                          --
 --   An exception to this is single-player mode, so you      --
 --   should use that to develop client-side code.            --
