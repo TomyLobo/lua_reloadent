@@ -110,7 +110,8 @@ local function lua_reloadtool(toolmode)
 	if metatable then
 		Msg("Reloading tool '"..toolmode.."'...\n")
 	else
-		error("Entity/weapon/tool '"..toolmode.."' not found.",0)
+		Msg("Entity/weapon/tool '"..toolmode.."' not found.")
+		return
 	end
 
 	SWEP = gmod_tool TOOL = metatable ToolObj = getmetatable(metatable)
@@ -122,7 +123,8 @@ local function lua_reloadtool(toolmode)
 	elseif luaExists("weapons/gmod_tool/stools/"..toolmode..".lua") then
 		include2("weapons/gmod_tool/stools/"..toolmode..".lua")
 	else
-		error("No source file for tool '"..toolmode.."' found.",0)
+		Msg("No source file for tool '"..toolmode.."' found.")
+		return
 	end
 
 	--TOOL:CreateConVars()
@@ -154,7 +156,8 @@ local function lua_reloadwep(entname, filename)
 	elseif luaExists(metatable.Folder.."/shared.lua") then
 		include2(metatable.Folder.."/shared.lua")
 	else
-		error("No source file for weapon '"..entname.."' found.",0)
+		Msg("No source file for weapon '"..entname.."' found.")
+		return
 	end
 	SWEP = nil
 
@@ -182,7 +185,8 @@ local function lua_reloadent(entname, filename)
 	elseif luaExists(metatable.Folder.."/shared.lua") then
 		include2(metatable.Folder.."/shared.lua")
 	else
-		error("No source file for entity '"..entname.."' found.",0)
+		Msg("No source file for entity '"..entname.."' found.")
+		return
 	end
 	ENT = nil
 
@@ -319,7 +323,8 @@ end -- if CLIENT
 
 local function lua_loadwep(entname, filename)
 	if weapons.Get(entname) then
-		error("Weapon '"..entname.."' already registered. Use 'lua_reloadent "..entname.."' to reload it.",0)
+		Msg("Weapon '"..entname.."' already registered. Use 'lua_reloadent "..entname.."' to reload it.")
+		return
 	end
 
 	local folder = "weapons/"..entname
@@ -337,7 +342,8 @@ local function lua_loadwep(entname, filename)
 	elseif luaExists(folder.."/shared.lua") then
 		include2(folder.."/shared.lua")
 	else
-		error("No source file for entity/weapon '"..entname.."' found.",0)
+		Msg("No source file for entity/weapon '"..entname.."' found.")
+		return
 	end
 
 	weapons.Register(SWEP, entname, false)
@@ -349,7 +355,8 @@ end
 
 local function lua_loadent(entname, filename)
 	if scripted_ents.Get(entname) then
-		error("Entity '"..entname.."' already registered. Use 'lua_reloadent "..entname.."' to reload it.",0)
+		Msg("Entity '"..entname.."' already registered. Use 'lua_reloadent "..entname.."' to reload it.")
+		return
 	end
 
 	local folder = "entities/"..entname
