@@ -57,7 +57,7 @@
 ---------------------------------------------------------------
 
 AddCSLuaFile("lua_reloadent.lua")
-local FindInLua = file.FindInLua or function(path)
+local FindInLua = VERSION < 150 and file.FindInLua or function(path)
 	return file.Find(path, LUA_PATH)
 end
 
