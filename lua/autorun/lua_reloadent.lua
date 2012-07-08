@@ -262,7 +262,7 @@ elseif CLIENT then
 	local function assign_index(index, ent_index)
 		local prefix, newindex = string.match(index, "^(.-_)(.*)$")
 		if newindex then
-			if ent_index[prefix] == false then ErrorNoHalt("SENTs/SWEPs/STOOLs ending with and underscore(_) are not supported.\n") end
+			if ent_index[prefix] == false then ErrorNoHalt("SENTs/SWEPs/STOOLs ending with an underscore(_) are not supported.\n") end
 			ent_index[prefix] = ent_index[prefix] or {}
 			return assign_index(newindex, ent_index[prefix])
 		end
@@ -308,7 +308,7 @@ elseif CLIENT then
 		condense_table(ent_index)
 	end
 
-	build_ent_index() -- only needed if this script is ever reload.
+	build_ent_index() -- call now, just in case this script is ever reloaded.
 	hook.Add("InitPostEntity", "lua_reloadent_build_ent_index", build_ent_index)
 
 	-- Adds all trie nodes starting with "startswith from the trie "ent_index" to the list "ret" and prefixes them with "prefix"
