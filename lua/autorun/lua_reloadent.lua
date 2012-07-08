@@ -1,8 +1,9 @@
 ---------------------------------------------------------------
 -- Usage:                                                    --
---   lua_reloadent{,_sv,_cl} <sent_class>                    --
---   lua_reloadent{,_sv,_cl} <swep_class>                    --
---   lua_reloadent{,_sv,_cl} <toolmode>                      --
+--   lua_reloadent{,_sv,_cl} sent <sent_class>               --
+--   lua_reloadent{,_sv,_cl} swep <swep_class>               --
+--   lua_reloadent{,_sv,_cl} tool <toolmode>                 --
+--   lua_reloadent{,_sv,_cl} <sent/swep/tool>                --
 --   lua_loadent <sent_class>                                --
 --   lua_loadent <swep_class>                                --
 --                                                           --
@@ -11,11 +12,16 @@
 -- lua_reloadent    reloads on the server and all clients.   --
 -- lua_loadent      registers a new entity class             --
 --                                                           --
+-- lua_reloadent, lua_reloadent_sv and lua_reloadent_cl can  --
+-- be told whether to look for a SENT, a SWEP or a tool.     --
+-- To do so, write "sent ", "swep " or "tool " before the    --
+-- sent/swep/tool name.                                      --
+--                                                           --
 ---------------------------------------------------------------
 -- Examples:                                                 --
 --   lua_reloadent lol_bomb                                  --
 --   lua_reloadent baby_gun                                  --
---   lua_reloadent explode_tool                              --
+--   lua_reloadent tool explode_tool                         --
 --                                                           --
 ---------------------------------------------------------------
 -- Pitfalls:                                                 --
@@ -44,6 +50,8 @@
 --                                                           --
 ---------------------------------------------------------------
 -- Version history:                                          --
+--   1.5.2 - You can now choose whether to reload a tool,    --
+--           SENT or SWEP. See "Usage" for how.              --
 --   1.5.1 - Fixed an error in gmod13 support for weapons.   --
 --   1.5.0 - Added support for current GMod 12/13 versions.  --
 --   1.4.1 - Auto-complete is now case-insensitive.          --
@@ -104,11 +112,14 @@ local function gettool(toolname, gmod_tool)
 end
 
 -- STOOLs
-local function lua_reloadtool(toolmode)
+local function lua_reloadtool(toolmode, nofallback)
 	local gmod_tool = getwep("gmod_tool")
 	local metatable = gettool(toolmode, gmod_tool)
 	if metatable then
 		Msg("Reloading tool '"..toolmode.."'...\n")
+	elseif nofallback then
+		Msg("Tool '"..toolmode.."' not found.")
+		return
 	else
 		Msg("Entity/weapon/tool '"..toolmode.."' not found.")
 		return
@@ -141,13 +152,15 @@ local function lua_reloadtool(toolmode)
 end
 
 -- SWEPs
-local function lua_reloadwep(entname, filename)
+local function lua_reloadwep(entname, filename, nofallback)
 	local metatable = getwep(entname)
 	if metatable then
 		Msg("Reloading weapon '"..entname.."'...\n")
+	elseif nofallback then
+		Msg("Weapon '"..entname.."' not found.")
+		return
 	else
 		return lua_reloadtool(entname)
-		--error("Weapon '"..entname.."' not found.",0)
 	end
 
 	SWEP = metatable
@@ -170,13 +183,15 @@ local function lua_reloadwep(entname, filename)
 end
 
 -- SENTs
-local function lua_reloadent(entname, filename)
+local function lua_reloadent(entname, filename, nofallback)
 	local metatable = getent(entname)
 	if metatable then
 		Msg("Reloading entity '"..entname.."'...\n")
+	elseif nofallback then
+		Msg("Entity "..entname.." not found.")
+		return
 	else
 		return lua_reloadwep(entname, filename)
-		--error("Entity "..entname.." not found.",0)
 	end
 
 	ENT = metatable
@@ -207,6 +222,21 @@ if SERVER then
 	-- The client is supposed to register less ugly proxy commands for these, which support auto-completition
 	concommand.Add("_lua_reloadentity_sv", function(ply,command,args)
 		if not ply:IsSuperAdmin() then return end
+
+		if args[2] then
+			if args[1] == "tool" then
+				lua_reloadtool(args[2], true)
+				return
+			end
+			if args[1] == "swep" then
+				lua_reloadwep(args[2], "/init.lua", true)
+				return
+			end
+			if args[1] == "sent" then
+				lua_reloadent(args[2], "/init.lua", true)
+				return
+			end
+		end
 
 		lua_reloadent(args[1], "/init.lua")
 	end)
@@ -260,15 +290,18 @@ elseif CLIENT then
 		ent_index = {}
 		for className,_ in pairs(scripted_ents.GetList()) do
 			assign_index(className,ent_index)
+			assign_index("sent "..className,ent_index)
 		end
 		for _,v in pairs(weapons.GetList()) do
 			local className = v.Classname or v.ClassName
 			if className == "gmod_tool" then gmod_tool = v end
 			assign_index(v.ClassName,ent_index)
+			assign_index("swep "..v.ClassName,ent_index)
 		end
 		if gmod_tool then
 			for toolmode,_ in pairs(gmod_tool.Tool) do
 				assign_index(toolmode,ent_index)
+				assign_index("tool "..toolmode,ent_index)
 			end
 		end
 
