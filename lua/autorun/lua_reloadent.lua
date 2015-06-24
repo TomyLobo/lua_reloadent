@@ -64,9 +64,9 @@
 --   1.0   - First public release                            --
 ---------------------------------------------------------------
 
-AddCSLuaFile("lua_reloadent.lua")
-local FindInLua = VERSION < 150 and file.FindInLua or function(path)
-	return file.Find(path, LUA_PATH)
+AddCSLuaFile()
+local FindInLua = function(path)
+	return file.Find(path, "LUA")
 end
 
 -- helper functions
@@ -221,7 +221,7 @@ if SERVER then
 	---------------------- Register server-side lua_reloadent ----------------------
 	-- The client is supposed to register less ugly proxy commands for these, which support auto-completition
 	concommand.Add("_lua_reloadentity_sv", function(ply,command,args)
-		if not ply:IsSuperAdmin() then return end
+		if ply:IsValid() and not ply:IsSuperAdmin() then return end
 
 		if args[2] then
 			if args[1] == "tool" then
@@ -242,7 +242,7 @@ if SERVER then
 	end)
 
 	concommand.Add("_lua_reloadent", function(ply,command,args)
-		if not ply:IsSuperAdmin() then return end
+		if ply:IsValid() and not ply:IsSuperAdmin() then return end
 
 		-- reload on the server
 		lua_reloadent(args[1], "/init.lua")
