@@ -76,7 +76,7 @@ end
 
 local include2 = include
 
-if CLIENT and not SinglePlayer() then
+if CLIENT and not game.SinglePlayer() then
 	local files = {}
 
 	function include2(filename)
@@ -93,15 +93,12 @@ if CLIENT and not SinglePlayer() then
 end
 
 local function getent(entname)
-	local metatable = scripted_ents.GetList()[entname]
+	local metatable = scripted_ents.GetStored(entname)
 	return metatable and metatable.t
 end
 
 local function getwep(entname)
-	for _,v in pairs(weapons.GetList()) do
-		local className = v.Classname or v.ClassName
-		if className == entname then return v end
-	end
+	return weapons.GetStored(entname)
 end
 
 local function gettool(toolname, gmod_tool)
@@ -168,6 +165,8 @@ local function lua_reloadwep(entname, filename, nofallback)
 		include2(metatable.Folder..filename)
 	elseif luaExists(metatable.Folder.."/shared.lua") then
 		include2(metatable.Folder.."/shared.lua")
+	elseif file.Exists(metatable.Folder..".lua","LUA") then
+		include2(metatable.Folder..".lua")
 	else
 		Msg("No source file for weapon '"..entname.."' found.")
 		return
@@ -195,10 +194,12 @@ local function lua_reloadent(entname, filename, nofallback)
 	end
 
 	ENT = metatable
-	if luaExists(metatable.Folder..filename) then
+	if luaExists(metatable.Folder) then
 		include2(metatable.Folder..filename)
 	elseif luaExists(metatable.Folder.."/shared.lua") then
 		include2(metatable.Folder.."/shared.lua")
+	elseif file.Exists(metatable.Folder..".lua","LUA") then
+		include2(metatable.Folder..".lua")
 	else
 		Msg("No source file for entity '"..entname.."' found.")
 		return
@@ -416,7 +417,7 @@ end
 
 if SERVER then
 	concommand.Add("lua_loadent", function(ply,command,args)
-		if not ply:IsSuperAdmin() then return end
+		if ply:IsValid() and not ply:IsSuperAdmin() then return end
 
 		-- load on the server
 		lua_loadent(args[1], "/init.lua")
